@@ -1151,12 +1151,11 @@ def run_local(name, model_uri, flavor=None, config=None):
     _logger.info("Using the %s flavor for local serving!", flavor)
 
     image = config.get("image", DEFAULT_IMAGE_NAME)
-    port = int(config.get("port", 5000))
 
     deployment_config = _get_deployment_config(flavor_name=flavor)
 
     _logger.info("launching docker image with path %s", model_path)
-    cmd = ["docker", "run", "-v", f"{model_path}:/opt/ml/model/", "-p", f"{port}:8080"]
+    cmd = ["docker", "run", "-v", f"{model_path}:/opt/ml/model/"]
     for key, value in deployment_config.items():
         cmd += ["-e", f"{key}={value}"]
     cmd += ["--rm", image, "serve"]
