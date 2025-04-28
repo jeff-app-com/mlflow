@@ -1303,6 +1303,7 @@ def _make_tarfile(output_filename, source_dir):
     """
     with tarfile.open(output_filename, "w:gz") as tar:
         for f in os.listdir(source_dir):
+            _logger.info(f"zipping: {os.path.join(source_dir, f)}")
             tar.add(os.path.join(source_dir, f), arcname=f)
 
 
