@@ -1331,7 +1331,12 @@ def _upload_s3(local_model_path, bucket, prefix, region_name, s3_client, **assum
             key = os.path.join(prefix, "model.tar.gz")
             obj = sess.resource("s3").Bucket(bucket).Object(key)
             obj.upload_fileobj(fobj)
-            _logger.info("Upload complete to s3://%s/%s", bucket, key)
+            # response = s3_client.put_object_tagging(
+            #     Bucket=bucket, Key=key, Tagging={"TagSet": [{"Key": "SageMaker", "Value": "true"}]}
+            # )
+            # _logger.info("tag response: %s", response)
+            _logger.info("uploaded")
+
             return f"s3://{bucket}/{key}"
 
 
