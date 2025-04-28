@@ -357,7 +357,7 @@ def _deploy(
         tags: An optional dictionary of tags to apply to the endpoint.
     """
     import boto3
-
+    _logger.info("archiving...")
     if (not archive) and (not synchronous):
         raise MlflowException(
             message=(
@@ -419,7 +419,7 @@ def _deploy(
     if not bucket:
         _logger.info("No model data bucket specified, using the default bucket")
         bucket = _get_default_s3_bucket(region_name, **assume_role_credentials)
-
+    _logger.info("uploading to s3")
     model_s3_path = _upload_s3(
         local_model_path=model_path,
         bucket=bucket,
@@ -428,7 +428,7 @@ def _deploy(
         s3_client=s3_client,
         **assume_role_credentials,
     )
-
+    _logger.info("updating/creating endpoint")
     if endpoint_exists:
         deployment_operation = _update_sagemaker_endpoint(
             endpoint_name=app_name,
@@ -1902,7 +1902,7 @@ def _create_sagemaker_model(
     }
     if vpc_config is not None:
         create_model_args["VpcConfig"] = vpc_config
-
+    _logger.info("creating model....")
     return sage_client.create_model(**create_model_args)
 
 
