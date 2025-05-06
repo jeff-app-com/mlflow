@@ -191,6 +191,7 @@ def _deploy(
     serverless_config=None,
     env=None,
     tags=None,
+    create_tar=True
 ):
     """
     Deploy an MLflow model on AWS SageMaker.
@@ -420,14 +421,19 @@ def _deploy(
         _logger.info("No model data bucket specified, using the default bucket")
         bucket = _get_default_s3_bucket(region_name, **assume_role_credentials)
     _logger.info("uploading to s3")
-    model_s3_path = _upload_s3(
-        local_model_path=model_path,
-        bucket=bucket,
-        prefix=model_name,
-        region_name=region_name,
-        s3_client=s3_client,
-        **assume_role_credentials,
-    )
+    if create_tar == True:
+        model_s3_path = _upload_s3(
+            local_model_path=model_path,
+            bucket=bucket,
+            prefix=model_name,
+            region_name=region_name,
+            s3_client=s3_client,
+            **assume_role_credentials,
+        )
+    else:
+        key = os.path.join(model_name, "model.tar.gz")
+        model_s3_path = f"s3://{bucket}/{key}"
+
     _logger.info("updating/creating endpoint")
     if endpoint_exists:
         deployment_operation = _update_sagemaker_endpoint(
@@ -2146,7 +2152,7 @@ class SageMakerDeploymentClient(BaseDeploymentClient):
 
             config[key] = value
 
-    def create_deployment(self, name, model_uri, flavor=None, config=None, endpoint=None):
+    def create_deployment(self, name, model_uri, flavor=None, config=None, endpoint=None, create_tar=True):
         """
         Deploy an MLflow model on AWS SageMaker.
         The currently active AWS account must have correct permissions set up.
@@ -2359,11 +2365,12 @@ class SageMakerDeploymentClient(BaseDeploymentClient):
             serverless_config=final_config["serverless_config"],
             env=final_config["env"],
             tags=final_config["tags"],
+            create_tar=create_tar
         )
 
         return {"name": app_name, "flavor": flavor}
 
-    def update_deployment(self, name, model_uri, flavor=None, config=None, endpoint=None):
+    def update_deployment(self, name, model_uri, flavor=None, config=None, endpoint=None, create_tar=True):
         """
         Update a deployment on AWS SageMaker. This function can replace or add a new model to
         an existing SageMaker endpoint. By default, this function replaces the existing model
@@ -2617,6 +2624,7 @@ class SageMakerDeploymentClient(BaseDeploymentClient):
             serverless_config=final_config["serverless_config"],
             env=final_config["env"],
             tags=final_config["tags"],
+            create_tar=create_tar
         )
 
         return {"name": app_name, "flavor": flavor}
