@@ -386,7 +386,7 @@ def build_and_push_container(build, push, container, install_java, env_manager, 
 
             src = os.path.join(tmp, "Dockerfile")
             dst = Path.cwd() / "Dockerfile-serve.mlflow"
-            shutil.move(src, dst)
-            docker_utils.build_image_from_context(tmp, image_name=container)
+            shutil.copy(src, dst)
+            print(f"Also saved a local copy at {dst}")
     if push:
         mlflow.sagemaker.push_image_to_ecr(container)
