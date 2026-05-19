@@ -483,7 +483,9 @@ def init(model: PyFuncModel):
                 media_type="application/json",
             )
 
-    async def ping():
+    @app.route("/ping", methods=["GET"])
+    @app.route("/health", methods=["GET"])
+    async def ping(request: Request):
         """
         Determine if the container is working and healthy.
         We declare it healthy if we can load the model successfully.
@@ -492,17 +494,14 @@ def init(model: PyFuncModel):
         status = 200 if health else 404
         return Response(content="\n", status_code=status, media_type="application/json")
 
-    app.get("/ping")(ping)
-    app.get("/health")(ping)
-
-    @app.get("/version")
-    async def version():
+    @app.route("/version", methods=["GET"])
+    async def version(request: Request):
         """
         Returns the current mlflow version.
         """
         return Response(content=VERSION, status_code=200, media_type="application/json")
 
-    @app.post("/invocations")
+    @app.route("/invocations", methods=["POST"])
     @_async_catch_mlflow_exception
     async def transformation(request: Request):
         """
